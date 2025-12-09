@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>John's Pixel Persona</title>
+    <!-- Import Phaser -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #2d2d2d;
+            --modal-bg: rgba(20, 20, 20, 0.95);
+            --text-color: #ffffff;
+            --accent-color: #4ade80;
+            /* Green */
+            --font-pixel: 'Press Start 2P', cursive;
+            --font-ui: 'Inter', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-ui);
+            overflow: hidden;
+            /* Game handles scrolling */
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* UI Overlay */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            /* Let clicks pass through to game */
+            z-index: 10;
+        }
+
+        /* HUD Elements */
+        .hud-element {
+            pointer-events: auto;
+            position: absolute;
+        }
+
+        #chat-box {
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--text-color);
+            padding: 15px;
+            max-width: 300px;
+            min-height: 80px;
+            font-family: var(--font-pixel);
+            font-size: 12px;
+            line-height: 1.5;
+            display: none;
+            /* Hidden by default */
+            image-rendering: pixelated;
+        }
+
+        #quick-menu {
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: var(--text-color);
+            color: #000;
+            border: 2px solid #000;
+            padding: 8px 12px;
+            font-family: var(--font-pixel);
+            font-size: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modals */
+        dialog {
+            pointer-events: auto;
+            background: var(--modal-bg);
+            color: var(--text-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            font-family: var(--font-ui);
+        }
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+        dialog h2 {
+            font-family: var(--font-pixel);
+            color: var(--accent-color);
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: var(--font-pixel);
+            cursor: pointer;
+        }
+
+        .modal-content {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container"></div>
+
+    <div id="ui-layer">
+        <!-- HUD -->
+        <div id="chat-box" class="hud-element">
+            <span id="chat-text">Welcome to my world!</span>
+        </div>
+
+        <div id="quick-menu" class="hud-element">
+            <button class="btn" onclick="openModal('resume-modal')">Resume</button>
+            <button class="btn" onclick="openModal('contact-modal')">Contact</button>
+        </div>
+
+        <!-- Modals -->
+        <dialog id="resume-modal">
+            <button class="close-btn" onclick="closeModal('resume-modal')">X</button>
+            <h2>The Archive (Resume)</h2>
+            <div class="modal-content">
+                <p><strong>Senior Creative Technologist</strong></p>
+                <p>Specializing in frontend game engines and immersive web experiences.</p>
+                <hr style="border-color: #444;">
+                <p>Experience:</p>
+                <ul>
+                    <li><strong>Google Deepmind</strong> - Agentic Coding Assistant (2024-Present)</li>
+                    <li><strong>Tech Corp</strong> - Senior Frontend Engineer (2020-2024)</li>
+                </ul>
+                <br>
+                <button class="btn" style="width: 100%;">Download PDF</button>
+            </div>
+        </dialog>
+
+        <dialog id="portfolio-modal">
+            <button class="close-btn" onclick="closeModal('portfolio-modal')">X</button>
+            <h2>The Gallery</h2>
+            <div class="modal-content">
+                <p>Here are some of my recent projects:</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div
+                        style="background: #333; height: 100px; display: flex; align-items: center; justify-content: center;">
+                        Project A</div>
+                    <div
+                        style="background: #333; height: 100px; display: flex; align-items: center; justify-content: center;">
+                        Project B</div>
+                </div>
+            </div>
+        </dialog>
+
+        <dialog id="contact-modal">
+            <button class="close-btn" onclick="closeModal('contact-modal')">X</button>
+            <h2>The Post Office</h2>
+            <div class="modal-content">
+                <p>Send me a message:</p>
+                <input type="text" placeholder="Your Name"
+                    style="width: 100%; margin-bottom: 10px; padding: 8px; background: #333; border: 1px solid #555; color: #fff;">
+                <input type="email" placeholder="Your Email"
+                    style="width: 100%; margin-bottom: 10px; padding: 8px; background: #333; border: 1px solid #555; color: #fff;">
+                <textarea placeholder="Message"
+                    style="width: 100%; margin-bottom: 10px; padding: 8px; background: #333; border: 1px solid #555; color: #fff; height: 80px;"></textarea>
+                <button class="btn">Send</button>
+            </div>
+        </dialog>
+
+        <dialog id="onboarding-modal" open>
+            <h2>Welcome to Project Pixel-Persona</h2>
+            <div class="modal-content">
+                <p>Enter your name to join the lobby.</p>
+                <input type="text" id="username-input" placeholder="Guest"
+                    style="width: 100%; margin-bottom: 20px; padding: 10px; background: #333; border: 1px solid #555; color: #fff; font-family: 'Press Start 2P';">
+                <button class="btn" onclick="startGame()">Enter World</button>
+            </div>
+        </dialog>
+    </div>
+
+    <script>
+        // --- UI Logic ---
+        function openModal(id) {
+            const dialog = document.getElementById(id);
+            if (dialog) dialog.showModal();
+            // Optional: Pause game input here
+            if (window.gameInstance) {
+                window.gameInstance.scene.scenes[0].input.enabled = false;
+            }
+        }
+
+        function closeModal(id) {
+            const dialog = document.getElementById(id);
+            if (dialog) dialog.close();
+            // Resume game input
+            if (window.gameInstance) {
+                window.gameInstance.scene.scenes[0].input.enabled = true;
+            }
+        }
+
+        function startGame() {
+            const input = document.getElementById('username-input');
+            const username = input.value || 'Guest';
+            document.getElementById('onboarding-modal').close();
+
+            // Initialize Game
+            initGame(username);
+        }
+
+        // --- Phaser Game Logic ---
+        function initGame(username) {
+            const config = {
+                type: Phaser.AUTO,
+                parent: 'game-container',
+                width: window.innerWidth,
+                height: window.innerHeight,
+                backgroundColor: '#2d2d2d',
+                pixelArt: true,
+                scene: MainScene,
+                physics: {
+                    default: 'arcade',
+                    arcade: {
+                        gravity: { y: 0 },
+                        debug: false // Set to true to see bounding boxes
+                    }
+                }
+            };
+
+            window.gameInstance = new Phaser.Game(config);
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                window.gameInstance.scale.resize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'MainScene' });
+                this.dialogueIndex = 0;
+            }
+
+            preload() {
+                // Generate textures programmatically since we have no assets
+                this.make.graphics({ x: 0, y: 0, add: false })
+                    .fillStyle(0xcccccc)
+                    .fillRect(0, 0, 32, 32)
+                    .generateTexture('floor', 32, 32);
+
+                this.make.graphics({ x: 0, y: 0, add: false })
+                    .fillStyle(0xffffff)
+                    .fillCircle(16, 16, 16)
+                    .generateTexture('player', 32, 32);
+
+                this.make.graphics({ x: 0, y: 0, add: false })
+                    .fillStyle(0x4ade80) // Green
+                    .fillRect(0, 0, 32, 48)
+                    .generateTexture('npc', 32, 48);
+
+                this.make.graphics({ x: 0, y: 0, add: false })
+                    .fillStyle(0x444444)
+                    .fillRect(0, 0, 64, 64)
+                    .generateTexture('kiosk', 64, 64);
+
+                this.make.graphics({ x: 0, y: 0, add: false })
+                    .fillStyle(0x994444)
+                    .fillRect(0, 0, 80, 40)
+                    .generateTexture('desk', 80, 40);
+
+                this.make.graphics({ x: 0, y: 0, add: false })
+                    .fillStyle(0x4444ff)
+                    .fillRect(0, 0, 40, 60)
+                    .generateTexture('easel', 40, 60);
+            }
+
+            create() {
+                // 1. Create Map/Floor
+                // Simple grid of tiles
+                const cols = 20;
+                const rows = 15;
+                const tileWidth = 32;
+                const tileHeight = 32;
+                const mapWidth = cols * tileWidth;
+                const mapHeight = rows * tileHeight;
+
+                // Centering the "room"
+                // For bounds, we need top-left coordinates relative to world if we want to constrain 
+                // but simpler to just center camera on it.
+                // Let's place the Room at (0,0) world space for simplicity, but center Camera.
+
+                // Actually, let's keep the centering logic for visual, but define bounds.
+                const startX = (this.scale.width - mapWidth) / 2;
+                const startY = (this.scale.height - mapHeight) / 2;
+
+                // Draw Grid
+                this.add.grid(
+                    this.scale.width / 2,
+                    this.scale.height / 2,
+                    mapWidth,
+                    mapHeight,
+                    tileWidth,
+                    tileHeight,
+                    0x2d2d2d,
+                    1,
+                    0x444444,
+                    1
+                ).setDepth(0);
+
+                // Set Physics Bounds to the Room Area
+                // NOTE: Physics bounds x,y,width,height
+                this.physics.world.setBounds(startX, startY, mapWidth, mapHeight);
+
+                // 2. Add Objects (Zones)
+                // Kiosk (Resume)
+                const kiosk = this.add.image(startX + 100, startY + 100, 'kiosk').setInteractive();
+                kiosk.on('pointerdown', () => openModal('resume-modal'));
+                this.add.text(kiosk.x - 30, kiosk.y - 45, "Resume", { fontFamily: 'Press Start 2P', fontSize: '10px' });
+
+                // Desk (Contact)
+                const desk = this.add.image(startX + 500, startY + 100, 'desk').setInteractive();
+                desk.on('pointerdown', () => openModal('contact-modal'));
+                this.add.text(desk.x - 30, desk.y - 35, "Post Office", { fontFamily: 'Press Start 2P', fontSize: '10px' });
+
+                // Gallery (Portfolio)
+                const easel = this.add.image(startX + 100, startY + 300, 'easel').setInteractive();
+                easel.on('pointerdown', () => openModal('portfolio-modal'));
+                this.add.text(easel.x - 20, easel.y - 45, "Gallery", { fontFamily: 'Press Start 2P', fontSize: '10px' });
+
+                // 3. Add NPC (John)
+                this.npc = this.physics.add.sprite(startX + 300, startY + 200, 'npc');
+                this.npc.setInteractive();
+
+                // NPC Dialogue Array
+                this.npcDialogues = [
+                    "Welcome to my world! I'm John.",
+                    "Feel free to explore. The Gallery on the left holds my work.",
+                    "The Kiosk has my professional history and Resume.",
+                    "Stop by the Post Office to send me a message!"
+                ];
+
+                this.npc.on('pointerdown', () => {
+                    const text = this.npcDialogues[this.dialogueIndex];
+                    this.showChat(text);
+                    // Cycle dialogue
+                    this.dialogueIndex = (this.dialogueIndex + 1) % this.npcDialogues.length;
+                });
+
+                // NPC Floating Text name
+                this.add.text(this.npc.x - 20, this.npc.y - 40, "John (Host)", { fontFamily: 'Inter', fontSize: '12px', color: '#4ade80' });
+
+                // 4. Player
+                this.player = this.physics.add.sprite(startX + 300, startY + 400, 'player');
+                this.player.setCollideWorldBounds(true);
+
+                // Camera
+                // this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+                // Since the room is fixed size and fits in most screens, maybe static camera is better? 
+                // Or follow but clamp. Let's just follow for now.
+
+                // Movement Logic
+                this.targetPos = null;
+
+                this.input.on('pointerdown', (pointer) => {
+                    // Check if we clicked on UI or Interactive object
+                    // In HTML, UI events stopPropagation usually, but here Canvas captures it.
+
+                    this.targetPos = { x: pointer.worldX, y: pointer.worldY };
+                    this.physics.moveTo(this.player, this.targetPos.x, this.targetPos.y, 200); // speed 200
+                });
+            }
+
+            update() {
+                // Stop player if close to target
+                if (this.targetPos) {
+                    const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.targetPos.x, this.targetPos.y);
+                    if (distance < 5) {
+                        this.player.body.reset(this.targetPos.x, this.targetPos.y);
+                        this.targetPos = null;
+                        this.player.body.setVelocity(0, 0); // Ensure stop
+                    }
+                }
+            }
+
+            showChat(text) {
+                const chatBox = document.getElementById('chat-box');
+                const chatText = document.getElementById('chat-text');
+                chatText.innerText = text;
+                chatBox.style.display = 'block';
+
+                // Hide after 3 seconds
+                if (this.chatTimer) clearTimeout(this.chatTimer);
+                this.chatTimer = setTimeout(() => {
+                    chatBox.style.display = 'none';
+                }, 4000);
+            }
+        }
+    </script>
+</body>
+
+</html>
